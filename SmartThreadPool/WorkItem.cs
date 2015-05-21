@@ -212,7 +212,11 @@ namespace Amib.Threading.Internal
 #if !(_WINDOWS_CE) && !(_SILVERLIGHT) && !(WINDOWS_PHONE)
             if (_workItemInfo.UseCallerCallContext || _workItemInfo.UseCallerHttpContext)
             {
-                _callerContext = CallerThreadContext.Capture(_workItemInfo.UseCallerCallContext, _workItemInfo.UseCallerHttpContext);
+                _callerContext = CallerThreadContext.Capture(_workItemInfo.UseCallerCallContext
+#if !(_SUBSET)
+                    , _workItemInfo.UseCallerHttpContext
+#endif
+                    );
             }
 #endif
 
@@ -364,7 +368,11 @@ namespace Amib.Threading.Internal
             CallerThreadContext ctc = null;
             if (null != _callerContext)
             {
-                ctc = CallerThreadContext.Capture(_callerContext.CapturedCallContext, _callerContext.CapturedHttpContext);
+                ctc = CallerThreadContext.Capture(_callerContext.CapturedCallContext
+#if !(_SUBSET)
+                    ,_callerContext.CapturedHttpContext
+#endif
+);
                 CallerThreadContext.Apply(_callerContext);
             }
 #endif

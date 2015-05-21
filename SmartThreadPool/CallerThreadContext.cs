@@ -5,7 +5,9 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Reflection;
+#if !(_SUBSET)
 using System.Web;
+#endif 
 using System.Runtime.Remoting.Messaging;
 
 
@@ -27,7 +29,7 @@ namespace Amib.Threading.Internal
 
 		private static readonly MethodInfo setLogicalCallContextMethodInfo =
 			typeof(Thread).GetMethod("SetLogicalCallContext", BindingFlags.Instance | BindingFlags.NonPublic);
-
+#if !(_SUBSET)
 		private static string HttpContextSlotName = GetHttpContextSlotName();
 
 		private static string GetHttpContextSlotName()
@@ -41,13 +43,15 @@ namespace Amib.Threading.Internal
 
 		    return "HttpContext";
 		}
+#endif
+#endregion
 
-        #endregion
+        #region Private fields
 
-#region Private fields
-
+#if !(_SUBSET)
 		private HttpContext _httpContext;
-		private LogicalCallContext _callContext;
+#endif
+        private LogicalCallContext _callContext;
 
         #endregion
 
@@ -65,7 +69,7 @@ namespace Amib.Threading.Internal
 				return (null != _callContext);
 			}
 		}
-
+#if !(_SUBSET)
 		public bool CapturedHttpContext
 		{
 			get
@@ -73,16 +77,23 @@ namespace Amib.Threading.Internal
 				return (null != _httpContext);
 			}
 		}
-
+#endif
 		/// <summary>
 		/// Captures the current thread context
 		/// </summary>
 		/// <returns></returns>
 		public static CallerThreadContext Capture(
-			bool captureCallContext, 
-			bool captureHttpContext)
+			bool captureCallContext
+#if !(_SUBSET)
+            , bool captureHttpContext
+#endif
+            )
 		{
-			Debug.Assert(captureCallContext || captureHttpContext);
+			Debug.Assert(captureCallContext 
+#if !(_SUBSET)
+                || captureHttpContext
+#endif
+                );
 
 			CallerThreadContext callerThreadContext = new CallerThreadContext();
 
@@ -96,13 +107,13 @@ namespace Amib.Threading.Internal
 					callerThreadContext._callContext = (LogicalCallContext)callerThreadContext._callContext.Clone();
 				}
 			}
-
+#if !(_SUBSET)
 			// Capture httpContext
 			if (captureHttpContext && (null != HttpContext.Current))
 			{
 				callerThreadContext._httpContext = HttpContext.Current;
 			}
-
+#endif
 			return callerThreadContext;
 		}
 
@@ -123,13 +134,14 @@ namespace Amib.Threading.Internal
 			{
 				setLogicalCallContextMethodInfo.Invoke(Thread.CurrentThread, new object[] { callerThreadContext._callContext });
 			}
-
+#if !(_SUBSET)
 			// Restore HttpContext 
 			if (callerThreadContext._httpContext != null)
 			{
                 HttpContext.Current = callerThreadContext._httpContext;
 				//CallContext.SetData(HttpContextSlotName, callerThreadContext._httpContext);
 			}
+#endif
 		}
 	}
 

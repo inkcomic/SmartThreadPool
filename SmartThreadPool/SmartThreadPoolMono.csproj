@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\Mono</OutputPath>
-    <DefineConstants>TRACE;DEBUG;_MONO</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;_MONO _SUBSET</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>1591</NoWarn>

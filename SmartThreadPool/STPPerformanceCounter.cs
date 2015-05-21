@@ -59,11 +59,14 @@ namespace Amib.Threading.Internal
 	internal class STPPerformanceCounter
 	{
 		// Fields
+#if !(_SUBSET)
 		private readonly PerformanceCounterType _pcType;
+#endif
 		protected string _counterHelp;
 		protected string _counterName;
 
 		// Methods
+#if !(_SUBSET)
 		public STPPerformanceCounter(
 			string counterName, 
 			string counterHelp, 
@@ -73,8 +76,7 @@ namespace Amib.Threading.Internal
 			_counterHelp = counterHelp;
 			_pcType = pcType;
 		}
-
-		public void AddCounterToCollection(CounterCreationDataCollection counterData)
+        public void AddCounterToCollection(CounterCreationDataCollection counterData)
 		{
 			CounterCreationData counterCreationData = new CounterCreationData(
 				_counterName, 
@@ -83,8 +85,18 @@ namespace Amib.Threading.Internal
 
 			counterData.Add(counterCreationData);
 		}
- 
-		// Properties
+#else
+        public STPPerformanceCounter(
+            string counterName,
+            string counterHelp)
+        {
+            _counterName = counterName;
+            _counterHelp = counterHelp;
+        }
+		
+#endif
+        
+        // Properties
 		public string Name
 		{
 			get
@@ -111,6 +123,7 @@ namespace Amib.Threading.Internal
 		private STPPerformanceCounters()
 		{
 			STPPerformanceCounter[] stpPerformanceCounters = new STPPerformanceCounter[] 
+#if !(_SUBSET)
 				{ 
 					new STPPerformanceCounter("Active threads", "The current number of available in the thread pool.", PerformanceCounterType.NumberOfItems32), 
 					new STPPerformanceCounter("In use threads", "The current number of threads that execute a work item.", PerformanceCounterType.NumberOfItems32), 
@@ -133,13 +146,37 @@ namespace Amib.Threading.Internal
 
 					new STPPerformanceCounter("Work Items Groups", "The current number of work item groups associated with the Smart Thread Pool.", PerformanceCounterType.NumberOfItems32), 
 				};
+#else
+            { 
+					new STPPerformanceCounter("Active threads", "The current number of available in the thread pool."), 
+					new STPPerformanceCounter("In use threads", "The current number of threads that execute a work item."), 
+					new STPPerformanceCounter("Overhead threads", "The current number of threads that are active, but are not in use."), 
+					new STPPerformanceCounter("% overhead threads", "The current number of threads that are active, but are not in use in percents."), 
+					new STPPerformanceCounter("% overhead threads base", "The current number of threads that are active, but are not in use in percents."), 
 
+					new STPPerformanceCounter("Work Items", "The number of work items in the Smart Thread Pool. Both queued and processed."), 
+					new STPPerformanceCounter("Work Items in queue", "The current number of work items in the queue"), 
+					new STPPerformanceCounter("Work Items processed", "The number of work items already processed"), 
+
+					new STPPerformanceCounter("Work Items queued/sec", "The number of work items queued per second"), 
+					new STPPerformanceCounter("Work Items processed/sec", "The number of work items processed per second"), 
+
+					new STPPerformanceCounter("Avg. Work Item wait time/sec", "The average time a work item supends in the queue waiting for its turn to execute."), 
+					new STPPerformanceCounter("Avg. Work Item wait time base", "The average time a work item supends in the queue waiting for its turn to execute."), 
+
+					new STPPerformanceCounter("Avg. Work Item process time/sec", "The average time it takes to process a work item."), 
+					new STPPerformanceCounter("Avg. Work Item process time base", "The average time it takes to process a work item."), 
+
+					new STPPerformanceCounter("Work Items Groups", "The current number of work item groups associated with the Smart Thread Pool."), 
+				};
+#endif
 			_stpPerformanceCounters = stpPerformanceCounters;
 			SetupCategory();
 		}
- 
+
 		private void SetupCategory()
 		{
+ #if !(_SUBSET)
 			if (!PerformanceCounterCategory.Exists(_stpCategoryName))
 			{
 				CounterCreationDataCollection counters = new CounterCreationDataCollection();
@@ -156,7 +193,8 @@ namespace Amib.Threading.Internal
 					counters);
 					
 			}
-		}
+#endif
+        }
  
 		// Properties
 		public static STPPerformanceCounters Instance
@@ -167,7 +205,7 @@ namespace Amib.Threading.Internal
 			}
 		}
  	}
-
+#if !(_SUBSET)
 	internal class STPInstancePerformanceCounter : IDisposable
 	{
 		// Fields
@@ -247,7 +285,7 @@ namespace Amib.Threading.Internal
 
 
 
-	internal class STPInstancePerformanceCounters : ISTPInstancePerformanceCounters
+    internal class STPInstancePerformanceCounters : ISTPInstancePerformanceCounters
 	{
         private bool _isDisposed;
 		// Fields
@@ -354,6 +392,7 @@ namespace Amib.Threading.Internal
 			GetCounter(STPPerformanceCounterType.AvgWorkItemProcessTimeBase).Increment();
 		}
     }
+#endif
 #endif
 
     internal class NullSTPInstancePerformanceCounters : ISTPInstancePerformanceCounters, ISTPPerformanceCountersReader
